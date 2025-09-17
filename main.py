@@ -45,7 +45,8 @@ async def editar_especifca(carta_id: int, carta_atualizada: Carta):
 # Endpoint para editar uma carta especifica
 @app.patch("/cartas/{carta_id}", response_model=Carta)
 async def editar_campo(carta_id: int, atualizacoes: CartaAtualizar):
-    carta_existente = db.get(carta_id)
+    carta_existente = next((item for item in db if item.id == carta_id), None)
+    
     if not carta_existente:
         raise HTTPException(status_code=404, detail="Carta não encontrada")
     
@@ -56,7 +57,11 @@ async def editar_campo(carta_id: int, atualizacoes: CartaAtualizar):
     
     carta_atualizada = carta_existente.copy(update=dados_novos)
     
-    db[carta_id] = carta_atualizada
+    for index, item in enumerate(db):
+        if item.id == carta_id:
+            db[index] = carta_atualizada
+            break
+    
     return carta_atualizada
     
 
